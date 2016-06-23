@@ -29,3 +29,5 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 #BusTracker
 application/config/database.php
 .phpintel
+application/config/config.php
+
