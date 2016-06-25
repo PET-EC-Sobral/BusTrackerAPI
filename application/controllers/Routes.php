@@ -2,7 +2,6 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 //require APPPATH . '/libraries/REST_Controller.php';
-require APPPATH.'/controllers/Localization.php';
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
 
@@ -19,7 +18,10 @@ class Routes extends CI_Controller {
      * @apiName GetRoutes
      * @apiGroup Routes
      *
-     * @apiParam {boolean} points Se false, retorna as rotas sem os pontos. Se true, retorna com os pontos.
+     * @apiParam (Parametros de url) {boolean} points Se false, retorna as rotas sem os pontos. 
+     *           Se true, retorna com os pontos. Por padrão é false.
+     * @apiExample Exemplo de uso:
+     *             curl -i http://host/BusTrackerAPI/index.php/routes?points=true
      *
      * @apiSuccess {Integer} id_routes ID unico da rota.
      * @apiSuccess {String} name  Nome da rota.
@@ -55,7 +57,18 @@ class Routes extends CI_Controller {
     function getRoutes(){
         $this->loadModel();
         $routes = $this->routes_model->index();
-        echo json_encode($routes);
+        
+        //add points into each route
+        if($this->input->get("points") === "true"){
+            foreach ($routes as $route){
+                $route->points = $this->routes_model->getPoints($route->id_routes);
+            }
+        }
+
+        return $this->output
+                        ->set_content_type('application/json')
+                        ->set_status_header(200)
+                        ->set_output(json_encode($routes, JSON_NUMERIC_CHECK));
     }
     /**
      * @api {post} /routes Adicionar uma rota
@@ -165,7 +178,11 @@ class Routes extends CI_Controller {
     	$this->loadModel();
         $route = $this->routes_model->getRoute($id);
         $route->points = $this->routes_model->getPoints($id);
-        echo json_encode($route, JSON_NUMERIC_CHECK);
+        
+        return $this->output
+                        ->set_content_type('application/json')
+                        ->set_status_header(200)
+                        ->set_output(json_encode($route, JSON_NUMERIC_CHECK));
     }
     /**
      * @api {get} /routes/:id/points Requisitar pontos de um rota
