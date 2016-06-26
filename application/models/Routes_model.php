@@ -14,10 +14,15 @@ class Routes_model extends CI_Model{
 		return $this->db->get(self::table)->result();
 	}
 	public function getRoute($id){
-		return $this->db->select('*')
+		$route = $this->db->select('*')
 						->from(self::table)
 						->where(self::table.".id_routes = {$id}")
-						->get()->result()[0];
+						->get()->result();
+
+		if(isset($route[0]))
+			return $route[0];
+		
+		return null; 
 	}
 	public function getPoints($id){
 		return $this->db->select(self::pointsTable.'.latitude, '.self::pointsTable.'.longitude')

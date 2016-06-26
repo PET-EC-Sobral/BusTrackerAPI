@@ -5,8 +5,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
 
-
-
 class Routes extends CI_Controller { 
 	private $routes = array();
     
@@ -65,10 +63,7 @@ class Routes extends CI_Controller {
             }
         }
 
-        return $this->output
-                        ->set_content_type('application/json')
-                        ->set_status_header(200)
-                        ->set_output(json_encode($routes, JSON_NUMERIC_CHECK));
+        return $this->makeJsonRespose($routes, 200);
     }
     /**
      * @api {post} /routes Adicionar uma rota
@@ -77,11 +72,11 @@ class Routes extends CI_Controller {
      *
      * @apiParam {String} name Nome da rota a ser adicionada.
      * @apiParam {String} description Descrição da rota a ser adicionada.
-     * @apiParam {array} points Conjuntos de pontos(coordenadas geográfica) que quando ligados formam a roda a ser adicionada. 
+     * @apiParam {array} points Conjuntos de pontos(coordenadas geográfica) que quando ligados formam a rota a ser adicionada. 
      *
-     * @apiSuccess (201) {Integer} id ID unico da rota.
+     * @apiSuccess (201 - RouteCreated) {Integer} id ID unico da rota.
      *
-     * @apiError (400) O json enviado é invalido. Isso pode ocorrer por falta de parametros, erros de tipos e erros de sintaxe. 
+     * @apiError (400 - InvalidJSON) O json enviado é invalido. Isso pode ocorrer por falta de parametros, erros de tipos e erros de sintaxe. 
      * 
      * @apiParamExample {json} Exemplo de requisição:
      *   {
@@ -101,7 +96,8 @@ class Routes extends CI_Controller {
      * @apiSuccessExample Exemplo de respota com sucesso:
      *     HTTP/1.1 201 CREATED
      *     {"id" : 9}
-     * @apiErrorExample {json} Exemplo de respota com erro :
+     * @apiErrorExample {json} Exemplo de respota com erro no json da requisição :
+     * HTTP/1.1 400 BAD REQUEST
      * [
      *     {
      *       "code": 0,
@@ -118,16 +114,10 @@ class Routes extends CI_Controller {
             $input = json_decode($this->input->raw_input_stream);
             $id = $this->routes_model->insertRoute($input);
             
-            return $this->output
-                        ->set_content_type('application/json')
-                        ->set_status_header(201)
-                        ->set_output(json_encode(["id" => $id], JSON_NUMERIC_CHECK)); 
+            return $this->makeJsonRespose(["id" => $id], 201); 
         }
         else{
-            return $this->output
-                        ->set_content_type('application/json')
-                        ->set_status_header(400)
-                        ->set_output(json_encode($validator->errors));
+            return $this->makeJsonRespose($validator->errors, 400);
         }
     }
     function validateJson($json, $schemaPath){
@@ -152,7 +142,9 @@ class Routes extends CI_Controller {
      * @apiSuccess {Integer} id_routes ID unico da rota.
      * @apiSuccess {String} name  Nome da rota.
      * @apiSuccess {String} description Descricao da rota.
-     * @apiSuccess {array} points Pontos com latidute e longitude que formam a rota.
+     * @apiSuccess {array} points Pontos com latitude e longitude que formam a rota.
+     *
+     * @apiError (404 - RouteNotFound) {Interger} id ID da rota requisitada não encontrado.
      *
      * @apiSuccessExample Resposta successo:
      *     HTTP/1.1 200 OK
@@ -173,23 +165,37 @@ class Routes extends CI_Controller {
      *         ]
      *       }       
      *     }
+     *
+     *
+     * @apiErrorExample {json} Exemplo de resposta de erro caso não exista rota com o id requisitado :
+     * HTTP/1.1 404 NOT FOUND
+     *     {
+     *       "id": 9
+     *     }
      */
     function getRoute($id){
     	$this->loadModel();
         $route = $this->routes_model->getRoute($id);
-        $route->points = $this->routes_model->getPoints($id);
-        
+        if($route != null){
+            $route->points = $this->routes_model->getPoints($id);
+
+            return $this->makeJsonRespose($route, 200);
+        }
+
+        return $this->makeJsonRespose(["id" => $id], 404);
+    }
+    function makeJsonRespose($output, $statusCode){
         return $this->output
-                        ->set_content_type('application/json')
-                        ->set_status_header(200)
-                        ->set_output(json_encode($route, JSON_NUMERIC_CHECK));
+                    ->set_content_type('application/json')
+                    ->set_status_header($statusCode)
+                    ->set_output(json_encode($output, JSON_NUMERIC_CHECK));
     }
     /**
      * @api {get} /routes/:id/points Requisitar pontos de um rota
      * @apiName GetPoints
      * @apiGroup Routes
      *
-     *
+     * @apiParam {Integer} id ID da rota que se requisita os pontos.
      * @apiSuccess {array} points Pontos com latidute e longitude que formam a rota.
      *
      * @apiSuccessExample Resposta successo:
@@ -224,7 +230,11 @@ class Routes extends CI_Controller {
     function getPoints($id){
         $this->loadModel();
         $points = $this->routes_model->getPoints($id);
-        echo json_encode($points);
+        
+        if($this->routes_model->getPoints($id) == null )
+            return $this->makeJsonRespose(["id" => $id], 404);
+
+        return $this->makeJsonRespose($points, 200);
     }
     /**
      * @api {delete} /routes/:id Deletar uma rota 
@@ -232,13 +242,24 @@ class Routes extends CI_Controller {
      * @apiGroup Routes
      *
      * @apiParam {Integer} id ID da rota a ser deletada.
-     *
+     * @apiSuccess (204 - RouteDeleted) {Integer} id ID da rota deletada.
+     * @apiError (404 - RouteNotFound) {Interger} id ID da rota requisitada não encontrado.
+     * 
+     * @apiErrorExample {json} Exemplo de resposta de erro caso não exista rota com o id requisitado :
+     * HTTP/1.1 404 NOT FOUND
+     *     {
+     *       "id": 9
+     *     }
      */
     function deleteRoute($id){
     	$this->loadModel();
-        $this->routes_model->deleteRoute($id);
+        $statusCode = 404;
 
-        return $this->output
-                    ->set_status_header(204);
+        if($this->routes_model->getRoute($id) != null){
+            $this->routes_model->deleteRoute($id);
+            $statusCode = 204;
+        }
+
+        return $this->makeJsonRespose(["id" => $id], $statusCode);
     }
 }
