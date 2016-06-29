@@ -52,3 +52,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+
+/*
+	Bus
+*/
+$route['routes/(:num)/buses']['get'] = 'bus/getBuses/$1';
+$route['routes/(:num)/buses']['post'] = 'bus/addBus/$1';
+
+//by id
+$route['routes/(:num)/buses/(:num)']['get'] = 'bus/getBus/$1/$2';
+//$route['routes/(:num)/bus/(:num)']['delete'] = 'bus/deleteBus/$1$2';//TODO
+//$route['routes/(:num)/bus/(:num)']['put'] = 'bus/updateBus/$1$2';//TODO
+
+//bus position
+$route['routes/(:num)/buses/(:num)/positions']['get'] = 'bus/getLocalizations/$1/$2';
+$route['routes/(:num)/buses/(:num)/positions']['post'] = 'bus/addLocalization/$1/$2';
+$route['routes/(:num)/buses/(:num)/positions']['delete'] = 'bus/deleteLocalizations/$1/$2';
