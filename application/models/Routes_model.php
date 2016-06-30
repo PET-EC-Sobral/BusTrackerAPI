@@ -6,6 +6,7 @@ class Routes_model extends CI_Model{
 	public $description;
 	const table = 'routes';
 	const pointsTable = 'points_route'; 
+	const busTable = 'bus';
 
 	public function __construct(){
 		parent::__construct();
@@ -48,6 +49,12 @@ class Routes_model extends CI_Model{
 		$this->db->insert_batch(self::pointsTable, $points);
 
 		return $id;
+	}
+	public function getBuses($id){
+		return $this->db->select("id_bus")
+						->from(self::busTable)
+						->where("id_routes = {$id}")
+						->get()->result();
 	}
 	public function deleteRoute($id){
 		$this->db->where('id_routes', $id);

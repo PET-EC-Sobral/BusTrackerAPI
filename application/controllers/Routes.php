@@ -24,6 +24,8 @@ class Routes extends CI_Controller {
      * @apiSuccess {Integer} id_routes ID unico da rota.
      * @apiSuccess {String} name  Nome da rota.
      * @apiSuccess {String} description Descricao da rota.
+     * @apiSuccess {Array} id_buses Id de todos os onibus pertencentes a rota.
+     * @apiSuccess {array} points Pontos com latitude e longitude que formam a rota.
      *
      * @apiSuccessExample Resposta successo sem pontos:
      *     HTTP/1.1 200 OK
@@ -31,13 +33,15 @@ class Routes extends CI_Controller {
      *       {
      *       "id_routes": "1",
      *       "name": "UFC",
-     *       "description": "Rota UFC - MED"
+     *       "description": "Rota UFC - MED",
+     *       "id_buses": [5,34,1]
      *     },
      *               ...
      *       {
      *       "id_routes": "2",
      *       "name": "UFC 2",
-     *       "description": "Rota UFC - UVA"
+     *       "description": "Rota UFC - UVA",
+     *       "id_buses": []
      *     }
      *    ]
      * @apiSuccessExample Resposta successo com pontos:
@@ -47,6 +51,7 @@ class Routes extends CI_Controller {
      *         "id_routes": 1,
      *         "name": "UFC",
      *         "description": "Rota UFC - MED",
+     *         "id_buses": [2,28,3]
      *         "points": [{"latitude":3.3232, "logitude":3.23232}, ..., {"latitude":2.343, "logitude":1.32} ]
      *       },
      *               ...
@@ -56,6 +61,11 @@ class Routes extends CI_Controller {
         $this->loadModel();
         $routes = $this->routes_model->index();
         
+        //add buses
+        foreach ($routes as $route){
+            $this->addIdBuses($route);
+        }
+
         //add points into each route
         if($this->input->get("points") === "true"){
             foreach ($routes as $route){
@@ -142,7 +152,9 @@ class Routes extends CI_Controller {
      * @apiSuccess {Integer} id_routes ID unico da rota.
      * @apiSuccess {String} name  Nome da rota.
      * @apiSuccess {String} description Descricao da rota.
+     * @apiSuccess {Array} id_buses Id de todos os onibus pertencentes a rota.
      * @apiSuccess {array} points Pontos com latitude e longitude que formam a rota.
+     *
      *
      * @apiError (404 - RouteNotFound) {Interger} id ID da rota requisitada não encontrado.
      *
@@ -152,6 +164,7 @@ class Routes extends CI_Controller {
      *         "id_routes": 1,
      *         "name": "UFC",
      *         "description": "Rota UFC-BB",
+     *         "id_buses": [5,34,1],
      *         "points": [
      *           {
      *             "latitude": -3.694505,
@@ -177,6 +190,7 @@ class Routes extends CI_Controller {
     	$this->loadModel();
         $route = $this->routes_model->getRoute($id);
         if($route != null){
+            $this->addIdBuses($route);
             $route->points = $this->routes_model->getPoints($id);
 
             return $this->makeJsonRespose($route, 200);
@@ -189,6 +203,13 @@ class Routes extends CI_Controller {
                     ->set_content_type('application/json')
                     ->set_status_header($statusCode)
                     ->set_output(json_encode($output, JSON_NUMERIC_CHECK));
+    }
+    function addIdBuses($route){
+        //add buses
+        $route->id_buses = [];
+        $buses = $this->routes_model->getBuses($route->id_routes);
+        foreach($buses as $bus)//make array without key 'id_buses'
+            $route->id_buses[] = $bus->id_bus;
     }
     /**
      * @api {get} /routes/:id/points Requisitar pontos de um rota
