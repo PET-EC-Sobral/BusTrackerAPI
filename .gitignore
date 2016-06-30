@@ -31,5 +31,6 @@ application/config/database.php
 .phpintel
 application/config/config.php
 docs
+user_guide
 
 
