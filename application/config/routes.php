@@ -52,3 +52,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+/*
+	Routes
+*/
+$route['routes']['get'] = 'routes/getRoutes';
+$route['routes']['post'] = 'routes/addRoute';
+
+//by id
+$route['routes/(:num)']['get'] = 'routes/getRoute/$1';
+$route['routes/(:num)/points']['get'] = 'routes/getPoints/$1';
+$route['routes/(:num)']['delete'] = 'routes/deleteRoute/$1';
+$route['routes/(:num)']['put'] = 'routes/updateRoute/$1';
+
+
+
