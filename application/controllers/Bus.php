@@ -310,12 +310,12 @@ class Bus extends CI_Controller {
      * @apiParam {Integer} idBus ID do onibus que se deseja apagar as localizações.
      *
      * @apiSuccess (204 - LocalizationsDeleted) {Integer} idBus ID do onibus que deve suas localizações apagadas.
-     * @apiSuccess (204 - LocalizationsDeleted) {Integer} idRoutes ID da rota deletada.
+     * @apiSuccess (204 - LocalizationsDeleted) {Integer} idRoutes ID da rota do onibus especificado.
      *
      * @apiError (404 - RouteNotFound) {Interger} idRoute ID da rota requisitada não encontrado.
      * @apiError (404 - RouteNotFound) {Interger} idBus ID do onibus requisitado não encontrado.
      * 
-     * @apiErrorExample {json} Exemplo de resposta de erro caso não exista rota com o id requisitado :
+     * @apiErrorExample {json} Exemplo de resposta de erro caso não exista o onibus com o id requisitado :
      * HTTP/1.1 404 NOT FOUND
      *     {
      *       "idBus": 9,
@@ -328,6 +328,38 @@ class Bus extends CI_Controller {
 
         if($this->bus_model->getBus($idRoute, $idBus) != null){
             $this->bus_model->deleteLocalizations($idRoute, $idBus);
+            $statusCode = 204;
+        }
+
+        return $this->makeJsonRespose(["idBus" => $idBus, "idRoute" => $idRoute], $statusCode);
+    }
+    /**
+     * @api {delete} /routes/:idRoute/buses/:idBus Deletar um onibus de uma rota
+     * @apiName DeleteBus
+     * @apiGroup Bus
+     *
+     * @apiParam {Integer} idRoute ID da rota que contem o onibus.
+     * @apiParam {Integer} idBus ID do onibus que se deseja apagar.
+     *
+     * @apiSuccess (204 - LocalizationsDeleted) {Integer} idBus ID do onibus deletado.
+     * @apiSuccess (204 - LocalizationsDeleted) {Integer} idRoutes ID da rota do onibus deletado.
+     *
+     * @apiError (404 - RouteNotFound) {Interger} idRoute ID da rota requisitada não encontrado.
+     * @apiError (404 - RouteNotFound) {Interger} idBus ID do onibus requisitado não encontrado.
+     *
+     * @apiErrorExample {json} Exemplo de resposta de erro caso não exista o onibus com o id requisitado :
+     * HTTP/1.1 404 NOT FOUND
+     *     {
+     *       "idBus": 8,
+     *       "idRoute": 2
+     *     }
+     */
+    function deleteBus($idRoute, $idBus){
+        $this->loadModel();
+        $statusCode = 404;
+
+        if($this->bus_model->getBus($idRoute, $idBus) != null){
+            $this->bus_model->deleteBus($idRoute, $idBus);
             $statusCode = 204;
         }
 

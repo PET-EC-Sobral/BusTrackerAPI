@@ -54,4 +54,10 @@ class Bus_model extends CI_Model{
 		$this->db->where("id_bus", $idBus);
 		$this->db->delete(self::lastLocalizationsTable);
 	}
+	public function deleteBus($idRoute, $idBus){
+		$this->deleteLocalizations($idRoute, $idBus);
+
+		$this->db->where("id_bus", $idBus);
+		$this->db->delete(self::table);
+	}
 }

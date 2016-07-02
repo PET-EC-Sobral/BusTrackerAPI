@@ -62,7 +62,7 @@ $route['routes/(:num)/buses']['post'] = 'bus/addBus/$1';
 
 //by id
 $route['routes/(:num)/buses/(:num)']['get'] = 'bus/getBus/$1/$2';
-//$route['routes/(:num)/bus/(:num)']['delete'] = 'bus/deleteBus/$1$2';//TODO
+$route['routes/(:num)/buses/(:num)']['delete'] = 'bus/deleteBus/$1/$2';
 //$route['routes/(:num)/bus/(:num)']['put'] = 'bus/updateBus/$1$2';//TODO
 
 //bus position
