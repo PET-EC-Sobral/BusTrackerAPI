@@ -102,7 +102,7 @@ class Bus extends CI_Controller {
      *            localizações. Onde n = localizations. Caso contrario, retorna o onibus com uma localização apenas, a saber, a ultima localização.
      * 
      * @apiExample Exemplo de uso:
-     *             curl -i http://host/BusTrackerAPI/index.php/routes/7/bus/2?localizations=2
+     *             curl -i http://host/BusTrackerAPI/index.php/routes/7/buses/2?localizations=2
      *
      * @apiSuccess (200 - Success) {Integer} id_bus ID unico do ônibus.
      * @apiSuccess (200 - Success) {String} velocity  Velocidade atual do ônibus.
@@ -159,7 +159,7 @@ class Bus extends CI_Controller {
      * @apiParam (Parametros de url) {Integer} length Especifica o tamanho do array de localizações desejado. 
      * 
      * @apiExample Exemplo de uso:
-     *             curl -i http://host/BusTrackerAPI/index.php/routes/7/bus/2/positions?length=2
+     *             curl -i http://host/BusTrackerAPI/index.php/routes/7/buses/2/positions?length=2
      *
      * @apiSuccess {array} root Array com ultimas localizações (latidute e longitude) que formam a rota.
      *
