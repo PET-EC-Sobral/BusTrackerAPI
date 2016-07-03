@@ -221,6 +221,7 @@ class Bus extends Authentication {
      * @api {post} /routes/:idRoute/buses/:idBus/position Adicionar uma localização a um ônibus
      * @apiName PostPosition
      * @apiGroup Bus
+     * @apiPermission tracker
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que será adicionada a localização.
      * @apiParam {Integer} idBus ID do onibus que será adicionada a localização.
@@ -260,6 +261,11 @@ class Bus extends Authentication {
      *           
      */
     function addLocalization($idRoute, $idBus){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
 
         if($this->bus_model->getBus($idRoute, $idBus) === null){
@@ -282,6 +288,7 @@ class Bus extends Authentication {
      * @api {post} /routes/:idRoute/buses Adicionar um ônibus a uma rota
      * @apiName PostBus
      * @apiGroup Bus
+     * @apiPermission tracker
      *
      * @apiSuccess (201 - RouteCreated) {Integer} idBus ID unico do onibus criado.
      * @apiSuccess (201 - RouteCreated) {Integer} idRoute ID da rota em que o onibus foi criado.
@@ -306,6 +313,11 @@ class Bus extends Authentication {
      *   ]
      */
     function addBus($idRoute){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/BusesAdd.json');
 
@@ -324,6 +336,7 @@ class Bus extends Authentication {
      * @api {delete} /routes/:idRoute/buses/:idBus/positions Deletar as localizações de um ônibus
      * @apiName DeleteBusPositions
      * @apiGroup Bus
+     * @apiPermission tracker
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus.
      * @apiParam {Integer} idBus ID do onibus que se deseja apagar as localizações.
@@ -342,6 +355,11 @@ class Bus extends Authentication {
      *     }
      */
     function deleteLocalizations($idRoute, $idBus){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $statusCode = 404;
 
@@ -356,6 +374,7 @@ class Bus extends Authentication {
      * @api {delete} /routes/:idRoute/buses/:idBus Deletar um onibus de uma rota
      * @apiName DeleteBus
      * @apiGroup Bus
+     * @apiPermission tracker
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus.
      * @apiParam {Integer} idBus ID do onibus que se deseja apagar.
@@ -374,6 +393,11 @@ class Bus extends Authentication {
      *     }
      */
     function deleteBus($idRoute, $idBus){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $statusCode = 404;
 

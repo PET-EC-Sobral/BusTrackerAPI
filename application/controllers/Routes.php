@@ -86,6 +86,7 @@ class Routes extends Authentication {
      * @api {post} /routes Adicionar uma rota
      * @apiName PostRoutes
      * @apiGroup Routes
+     * @apiPermission tracker
      *
      * @apiParam {String} name Nome da rota a ser adicionada.
      * @apiParam {String} description Descrição da rota a ser adicionada.
@@ -125,6 +126,11 @@ class Routes extends Authentication {
      *   ]
      */
     function addRoute(){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/RoutesAdd.json');
     	if($validator->valid){
             $this->loadModel();
@@ -280,6 +286,7 @@ class Routes extends Authentication {
      * @api {delete} /routes/:id Deletar uma rota 
      * @apiName DeleteRoutes
      * @apiGroup Routes
+     * @apiPermission tracker
      *
      * @apiParam {Integer} id ID da rota a ser deletada.
      * @apiSuccess (204 - RouteDeleted) {Integer} id ID da rota deletada.
@@ -292,6 +299,11 @@ class Routes extends Authentication {
      *     }
      */
     function deleteRoute($id){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
     	$this->loadModel();
         $statusCode = 404;
 
