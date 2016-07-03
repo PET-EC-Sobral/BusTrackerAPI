@@ -3,8 +3,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
+include( APPPATH.'controllers/Authentication.php' );
 
-class Bus extends CI_Controller { 
+class Bus extends Authentication {
     
     function loadModel(){
         $this->load->model('bus_model', '', TRUE);
@@ -74,6 +75,11 @@ class Bus extends CI_Controller {
      *     ]
      */
     function getBuses($routeId){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $buses = $this->bus_model->index($routeId);
         
@@ -135,6 +141,11 @@ class Bus extends CI_Controller {
      *       }
      */
     function getBus($idRoute, $idBus){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $bus = $this->bus_model->getBus($idRoute, $idBus);
 
@@ -184,6 +195,11 @@ class Bus extends CI_Controller {
      *           ]
      */
     function getLocalizations($idRoute, $idBus){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $lengthDefault = 10;
 

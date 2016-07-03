@@ -4,8 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //require APPPATH . '/libraries/REST_Controller.php';
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
+include( APPPATH.'controllers/Authentication.php' );
 
-class Routes extends CI_Controller { 
+class Routes extends Authentication {
 	private $routes = array();
     
     function loadModel(){
@@ -58,6 +59,11 @@ class Routes extends CI_Controller {
      *      ]
      */
     function getRoutes(){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $routes = $this->routes_model->index();
         
@@ -187,6 +193,11 @@ class Routes extends CI_Controller {
      *     }
      */
     function getRoute($id){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISION))
+            return $this->makeUnauthorizedResponse();
+
     	$this->loadModel();
         $route = $this->routes_model->getRoute($id);
         if($route != null){
@@ -249,6 +260,11 @@ class Routes extends CI_Controller {
      *         ]
      */
     function getPoints($id){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $points = $this->routes_model->getPoints($id);
         
