@@ -54,7 +54,6 @@ class Authentication extends CI_Controller {
     }
     private static function CRYPT_KEY(){
         global $BusTrackerConfig;
-        echo $BusTrackerConfig["CRYPT_KEY"];
         return $BusTrackerConfig["CRYPT_KEY"];//a 128 bits crypt key
     }
     public function makeUnauthorizedResponse(){
