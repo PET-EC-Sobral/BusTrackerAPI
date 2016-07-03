@@ -14,6 +14,7 @@ class Bus extends Authentication {
      * @api {get} /routes/:idRoute/buses Requisitar os ônibus de uma rota
      * @apiName GetBuses
      * @apiGroup Bus
+     * @apiPermission client
      *
      * @apiParam {Integer} idRoute ID da rota onde se deseja requisitar os onibus.
      * @apiParam (Parametros de url) {Interger} localizations Se maior que 0, retorna os ônibus com suas n ultimas 
@@ -77,7 +78,7 @@ class Bus extends Authentication {
     function getBuses($routeId){
         //check read permissions
         $token = $this->authenticate();
-        if(!$token->valid(Authentication::CLIENT_PERMISION))
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
             return $this->makeUnauthorizedResponse();
 
         $this->loadModel();
@@ -101,6 +102,7 @@ class Bus extends Authentication {
      * @api {get} /routes/:idRoute/buses/:idBus Requisitar um ônibus
      * @apiName GetBus
      * @apiGroup Bus
+     * @apiPermission client
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que se requisita.
      * @apiParam {Integer} idBus ID do onibus solicitado.          
@@ -143,7 +145,7 @@ class Bus extends Authentication {
     function getBus($idRoute, $idBus){
         //check read permissions
         $token = $this->authenticate();
-        if(!$token->valid(Authentication::CLIENT_PERMISION))
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
             return $this->makeUnauthorizedResponse();
 
         $this->loadModel();
@@ -163,6 +165,7 @@ class Bus extends Authentication {
      * @api {get} /routes/:idRoute/buses/:idBus/positions Requisitar localizações de um ônibus
      * @apiName GetPositions
      * @apiGroup Bus
+     * @apiPermission client
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que se requisita as localizações.
      * @apiParam {Integer} idBus ID do onibus que se requisita as localizações.
@@ -197,7 +200,7 @@ class Bus extends Authentication {
     function getLocalizations($idRoute, $idBus){
         //check read permissions
         $token = $this->authenticate();
-        if(!$token->valid(Authentication::CLIENT_PERMISION))
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
             return $this->makeUnauthorizedResponse();
 
         $this->loadModel();

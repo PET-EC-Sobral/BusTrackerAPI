@@ -16,6 +16,7 @@ class Routes extends Authentication {
      * @api {get} /routes Requisitar rotas
      * @apiName GetRoutes
      * @apiGroup Routes
+     * @apiPermission client
      *
      * @apiParam (Parametros de url) {boolean} points Se false, retorna as rotas sem os pontos. 
      *           Se true, retorna com os pontos. Por padrão é false.
@@ -61,7 +62,7 @@ class Routes extends Authentication {
     function getRoutes(){
         //check read permissions
         $token = $this->authenticate();
-        if(!$token->valid(Authentication::CLIENT_PERMISION))
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
             return $this->makeUnauthorizedResponse();
 
         $this->loadModel();
@@ -153,6 +154,7 @@ class Routes extends Authentication {
      * @apiParam {Integer} id Users unique ID.
      * @apiName GetRoute
      * @apiGroup Routes
+     * @apiPermission client
      *
      *
      * @apiSuccess {Integer} id_routes ID unico da rota.
@@ -195,7 +197,7 @@ class Routes extends Authentication {
     function getRoute($id){
         //check read permissions
         $token = $this->authenticate();
-        if(!$token->valid(Authentication::CLIENT_PERMISION))
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
             return $this->makeUnauthorizedResponse();
 
     	$this->loadModel();
@@ -226,6 +228,7 @@ class Routes extends Authentication {
      * @api {get} /routes/:id/points Requisitar pontos de um rota
      * @apiName GetPoints
      * @apiGroup Routes
+     * @apiPermission client
      *
      * @apiParam {Integer} id ID da rota que se requisita os pontos.
      * @apiSuccess {array} points Pontos com latidute e longitude que formam a rota.
@@ -262,7 +265,7 @@ class Routes extends Authentication {
     function getPoints($id){
         //check read permissions
         $token = $this->authenticate();
-        if(!$token->valid(Authentication::CLIENT_PERMISION))
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
             return $this->makeUnauthorizedResponse();
 
         $this->loadModel();
