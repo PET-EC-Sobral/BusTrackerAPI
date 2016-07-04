@@ -1,9 +1,16 @@
 {
   "name": "Bus Tracker API",
   "version": "0.1.0",
-  "description": "Bus Tracker API",
   "title": "Bus Tracker API",
-  "url" : "https://host/BusTrackerAPI/index.php"
+  "url" : "http://host/BusTrackerAPI/index.php",
+  "header": {
+    "title": "Start",
+    "filename": "header.md"
+  },
+  "order": [
+      "Routes",
+      "Bus"
+  ]
 }
 
   

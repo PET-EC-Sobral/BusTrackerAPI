@@ -20,6 +20,7 @@ class Bus_model extends CI_Model{
 		return $this->db->select(self::lastLocalizationsTable.'.latitude, '.self::lastLocalizationsTable.'.longitude, '.self::lastLocalizationsTable.'.date')
 						->from(self::lastLocalizationsTable)
 						->where(self::lastLocalizationsTable.".id_bus = {$idBus}")
+						->order_by("date", "desc")
 						->limit($limit,0)
 						->get()->result();
 	}
