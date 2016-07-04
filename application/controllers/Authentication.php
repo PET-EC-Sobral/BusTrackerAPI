@@ -14,7 +14,7 @@ class Token {
         return $this->permission;
     }
     public function valid($permission){
-        if($this->getPermission() != $permission)
+        if($this->getPermission() != $permission && $this->getPermission() != Authentication::ADMIN_PERMISSION)
             return false;
 
         return true;
@@ -24,6 +24,7 @@ class Token {
 class Authentication extends CI_Controller {
     const CLIENT_PERMISSION = 1;
     const TRACKER_PERMISSION = 2;
+    const ADMIN_PERMISSION = 3;
 
     final function authenticate(){
         //decode token
