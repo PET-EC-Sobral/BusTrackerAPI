@@ -3,8 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
-
-class Bus extends CI_Controller { 
+include( APPPATH.'controllers/Authentication.php' );
+/**
+ * @apiDefine tokenParam
+ * @apiHeader {String} Token Token do usuario que realizara a ação.
+ */
+class Bus extends Authentication {
     
     function loadModel(){
         $this->load->model('bus_model', '', TRUE);
@@ -13,6 +17,9 @@ class Bus extends CI_Controller {
      * @api {get} /routes/:idRoute/buses Requisitar os ônibus de uma rota
      * @apiName GetBuses
      * @apiGroup Bus
+     * @apiPermission client
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota onde se deseja requisitar os onibus.
      * @apiParam (Parametros de url) {Interger} localizations Se maior que 0, retorna os ônibus com suas n ultimas 
@@ -74,6 +81,11 @@ class Bus extends CI_Controller {
      *     ]
      */
     function getBuses($routeId){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $buses = $this->bus_model->index($routeId);
         
@@ -95,6 +107,9 @@ class Bus extends CI_Controller {
      * @api {get} /routes/:idRoute/buses/:idBus Requisitar um ônibus
      * @apiName GetBus
      * @apiGroup Bus
+     * @apiPermission client
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que se requisita.
      * @apiParam {Integer} idBus ID do onibus solicitado.          
@@ -135,6 +150,11 @@ class Bus extends CI_Controller {
      *       }
      */
     function getBus($idRoute, $idBus){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $bus = $this->bus_model->getBus($idRoute, $idBus);
 
@@ -152,6 +172,9 @@ class Bus extends CI_Controller {
      * @api {get} /routes/:idRoute/buses/:idBus/positions Requisitar localizações de um ônibus
      * @apiName GetPositions
      * @apiGroup Bus
+     * @apiPermission client
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que se requisita as localizações.
      * @apiParam {Integer} idBus ID do onibus que se requisita as localizações.
@@ -184,6 +207,11 @@ class Bus extends CI_Controller {
      *           ]
      */
     function getLocalizations($idRoute, $idBus){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $lengthDefault = 10;
 
@@ -202,6 +230,9 @@ class Bus extends CI_Controller {
      * @api {post} /routes/:idRoute/buses/:idBus/position Adicionar uma localização a um ônibus
      * @apiName PostPosition
      * @apiGroup Bus
+     * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que será adicionada a localização.
      * @apiParam {Integer} idBus ID do onibus que será adicionada a localização.
@@ -241,6 +272,11 @@ class Bus extends CI_Controller {
      *           
      */
     function addLocalization($idRoute, $idBus){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
 
         if($this->bus_model->getBus($idRoute, $idBus) === null){
@@ -263,6 +299,9 @@ class Bus extends CI_Controller {
      * @api {post} /routes/:idRoute/buses Adicionar um ônibus a uma rota
      * @apiName PostBus
      * @apiGroup Bus
+     * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiSuccess (201 - RouteCreated) {Integer} idBus ID unico do onibus criado.
      * @apiSuccess (201 - RouteCreated) {Integer} idRoute ID da rota em que o onibus foi criado.
@@ -287,6 +326,11 @@ class Bus extends CI_Controller {
      *   ]
      */
     function addBus($idRoute){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/BusesAdd.json');
 
@@ -305,6 +349,9 @@ class Bus extends CI_Controller {
      * @api {delete} /routes/:idRoute/buses/:idBus/positions Deletar as localizações de um ônibus
      * @apiName DeleteBusPositions
      * @apiGroup Bus
+     * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus.
      * @apiParam {Integer} idBus ID do onibus que se deseja apagar as localizações.
@@ -323,6 +370,11 @@ class Bus extends CI_Controller {
      *     }
      */
     function deleteLocalizations($idRoute, $idBus){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $statusCode = 404;
 
@@ -337,6 +389,9 @@ class Bus extends CI_Controller {
      * @api {delete} /routes/:idRoute/buses/:idBus Deletar um onibus de uma rota
      * @apiName DeleteBus
      * @apiGroup Bus
+     * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus.
      * @apiParam {Integer} idBus ID do onibus que se deseja apagar.
@@ -355,6 +410,11 @@ class Bus extends CI_Controller {
      *     }
      */
     function deleteBus($idRoute, $idBus){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $statusCode = 404;
 

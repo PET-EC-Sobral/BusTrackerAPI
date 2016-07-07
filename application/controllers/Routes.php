@@ -4,8 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //require APPPATH . '/libraries/REST_Controller.php';
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
-
-class Routes extends CI_Controller { 
+include( APPPATH.'controllers/Authentication.php' );
+/**
+ * @apiDefine tokenParam
+ * @apiHeader {String} Token Token do usuario que realizara a ação.
+ */
+class Routes extends Authentication {
 	private $routes = array();
     
     function loadModel(){
@@ -15,6 +19,9 @@ class Routes extends CI_Controller {
      * @api {get} /routes Requisitar rotas
      * @apiName GetRoutes
      * @apiGroup Routes
+     * @apiPermission client
+     *
+     * @apiUse tokenParam
      *
      * @apiParam (Parametros de url) {boolean} points Se false, retorna as rotas sem os pontos. 
      *           Se true, retorna com os pontos. Por padrão é false.
@@ -58,6 +65,11 @@ class Routes extends CI_Controller {
      *      ]
      */
     function getRoutes(){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $routes = $this->routes_model->index();
         
@@ -79,6 +91,9 @@ class Routes extends CI_Controller {
      * @api {post} /routes Adicionar uma rota
      * @apiName PostRoutes
      * @apiGroup Routes
+     * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {String} name Nome da rota a ser adicionada.
      * @apiParam {String} description Descrição da rota a ser adicionada.
@@ -118,6 +133,11 @@ class Routes extends CI_Controller {
      *   ]
      */
     function addRoute(){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/RoutesAdd.json');
     	if($validator->valid){
             $this->loadModel();
@@ -147,7 +167,9 @@ class Routes extends CI_Controller {
      * @apiParam {Integer} id Users unique ID.
      * @apiName GetRoute
      * @apiGroup Routes
+     * @apiPermission client
      *
+     * @apiUse tokenParam
      *
      * @apiSuccess {Integer} id_routes ID unico da rota.
      * @apiSuccess {String} name  Nome da rota.
@@ -187,6 +209,11 @@ class Routes extends CI_Controller {
      *     }
      */
     function getRoute($id){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
     	$this->loadModel();
         $route = $this->routes_model->getRoute($id);
         if($route != null){
@@ -215,6 +242,9 @@ class Routes extends CI_Controller {
      * @api {get} /routes/:id/points Requisitar pontos de um rota
      * @apiName GetPoints
      * @apiGroup Routes
+     * @apiPermission client
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} id ID da rota que se requisita os pontos.
      * @apiSuccess {array} points Pontos com latidute e longitude que formam a rota.
@@ -249,6 +279,11 @@ class Routes extends CI_Controller {
      *         ]
      */
     function getPoints($id){
+        //check read permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
         $this->loadModel();
         $points = $this->routes_model->getPoints($id);
         
@@ -261,6 +296,9 @@ class Routes extends CI_Controller {
      * @api {delete} /routes/:id Deletar uma rota 
      * @apiName DeleteRoutes
      * @apiGroup Routes
+     * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} id ID da rota a ser deletada.
      * @apiSuccess (204 - RouteDeleted) {Integer} id ID da rota deletada.
@@ -273,6 +311,11 @@ class Routes extends CI_Controller {
      *     }
      */
     function deleteRoute($id){
+        //check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
     	$this->loadModel();
         $statusCode = 404;
 

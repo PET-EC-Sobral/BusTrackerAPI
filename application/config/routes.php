@@ -80,3 +80,10 @@ $route['routes/(:num)/buses/(:num)']['delete'] = 'bus/deleteBus/$1/$2';
 $route['routes/(:num)/buses/(:num)/positions']['get'] = 'bus/getLocalizations/$1/$2';
 $route['routes/(:num)/buses/(:num)/positions']['post'] = 'bus/addLocalization/$1/$2';
 $route['routes/(:num)/buses/(:num)/positions']['delete'] = 'bus/deleteLocalizations/$1/$2';
+
+/*
+	Users
+*/
+$route['users']['post'] = 'user/create';
+$route['users']['get'] = 'user/getUser';
+$route['users/tokens']['post'] ='user/getToken';
