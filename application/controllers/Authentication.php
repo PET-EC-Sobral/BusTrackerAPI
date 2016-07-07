@@ -27,19 +27,7 @@ class Authentication extends CI_Controller {
     const ADMIN_PERMISSION = 3;
 
     final function authenticate(){
-        //decode token
-        $tokenCrypt = $this->input->get_request_header('Token', TRUE);
-        $tokenCrypt = base64_decode($tokenCrypt);
-
-        $aes = new AES(Authentication::CRYPT_KEY());
-        $token = json_decode($aes->decrypt($tokenCrypt));
-
-        if($token == null || json_last_error() != JSON_ERROR_NONE)//invalid token
-            return new Token(-1);
-
-        //get user from database
-        $this->load->model("user_model",  '', TRUE);
-        $user = $this->user_model->get($token);
+        $user = $this->getUser();
         if($user == null)//user not found
             return new Token(-1);
 
@@ -52,6 +40,26 @@ class Authentication extends CI_Controller {
                                   "password" => $user->password]);
 
         return base64_encode($aes->encrypt($tokenJson));
+    }
+    public final function getUserFromToken($tokenCrypt){
+        //decode token
+        $tokenCrypt = base64_decode($tokenCrypt);
+        $aes = new AES(Authentication::CRYPT_KEY());
+        $token = json_decode($aes->decrypt($tokenCrypt));
+
+        if($token == null || json_last_error() != JSON_ERROR_NONE)//invalid token
+            return null;
+
+        //get user from database
+        $this->load->model("user_model",  '', TRUE);
+        $user = $this->user_model->get($token);
+
+        unset($user->password);
+        return $user;
+    }
+    function getUser(){
+        $tokenCrypt = $this->input->get_request_header('Token', TRUE);
+        return $this->getUserFromToken($tokenCrypt);
     }
     private static function CRYPT_KEY(){
         global $BusTrackerConfig;

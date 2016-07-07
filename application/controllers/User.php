@@ -5,7 +5,30 @@ require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
 include( APPPATH.'controllers/Authentication.php' );
 
-class User extends CI_Controller {
+/**
+ * @apiDefine tokenParam
+ * @apiHeader {String} Token Token do usuario que realizara a ação.
+ */
+/**
+ * @apiDefine invalidJson
+ * @apiError (400 - InvalidJSON) {json} root O json enviado é invalido. Isso pode ocorrer por falta de parametros, erros de tipos e erros de sintaxe.
+ */
+/**
+ * @apiDefine badResquestExemple
+ * @apiErrorExample {json} Exemplo de respota com erro no json da requisição:
+ * HTTP/1.1 400 BAD REQUEST
+ * [
+ *     {
+ *       "code": 0,
+ *       "dataPath": "",
+ *       "schemaPath": "/type",
+ *       "message": "Invalid type: null"
+ *     }
+ *   ]
+ */
+
+
+class User extends Authentication {
     /**
      * @api {post} /users Registrar um usuário
      * @apiName PostUsers
@@ -24,7 +47,7 @@ class User extends CI_Controller {
      *           de escrita. Se 3, tem permissão de escrita e leitura.
      *
      * @apiError (409 - ExistingEmail) {json} root Já existe um usuário com este email.
-     * @apiError (400 - InvalidJSON) {json} root O json enviado é invalido. Isso pode ocorrer por falta de parametros, erros de tipos e erros de sintaxe.
+     * @apiUse invalidJson
      *
      * @apiParamExample {json} Exemplo de requisição:
      *    {
@@ -39,18 +62,11 @@ class User extends CI_Controller {
      *        "name": "L Lawliet",
      *        "email": "llawliet@email.com",
      *        "permission": 1,
-     *        "token": "Me1wdd1TCDqKVym2Ynjuia8GlstcHneqOb9Ux+q3Um9T3B9luR63RqvtfO4HBUTKH2RUghRhCQQ18pdEwjHuig=="
+     *        "token": "Me1wdd1TCDqKVym2...hRhCQQ18pdEwjHuig=="
      *     }
-     * @apiErrorExample {json} Exemplo de respota com erro no json da requisição :
-     * HTTP/1.1 400 BAD REQUEST
-     * [
-     *     {
-     *       "code": 0,
-     *       "dataPath": "",
-     *       "schemaPath": "/type",
-     *       "message": "Invalid type: null"
-     *     }
-     *   ]
+     *
+     * @apiUse badResquestExemple
+     *
      * @apiErrorExample {json} Exemplo de respota com email em uso:
      * HTTP/1.1 409 CONFLICT
      * {
@@ -93,7 +109,7 @@ class User extends CI_Controller {
      * @apiParam (200 - Success) {String} token Token requisitado.
      *
      * @apiError (401 - InvalidCredentials) {json} root Email ou senha errados.
-     * @apiError (400 - InvalidJSON) {json} root O json enviado é invalido. Isso pode ocorrer por falta de parametros, erros de tipos e erros de sintaxe.
+     * @apiUse invalidJson
      *
      * @apiParamExample {json} Exemplo de requisição:
      *    {
@@ -101,20 +117,13 @@ class User extends CI_Controller {
      *     "password": "lsecret",
      *   }
      * @apiSuccessExample Exemplo de respota com sucesso:
-     *     HTTP/1.1 200 CREATED
+     *     HTTP/1.1 200 OK
      *     {
-     *        "token":"Me1wdd1TCDqKVym2Ynjuia8GlstcHasneqOUx+q3Um9T3B9luR63RqvtfO4HBUTKH2RUghRhCQQ18pdEwjHuig=="
+     *        "token":"Me1wdd1TCDqKVym2...hRhCQQ18pdEwjHuig=="
      *     }
-     * @apiErrorExample {json} Exemplo de respota com erro no json da requisição :
-     * HTTP/1.1 400 BAD REQUEST
-     * [
-     *     {
-     *       "code": 0,
-     *       "dataPath": "",
-     *       "schemaPath": "/type",
-     *       "message": "Invalid type: null"
-     *     }
-     *   ]
+     *
+     * @apiUse badResquestExemple
+     *
      */
     public function getToken(){
         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/UsersLogin.json');
@@ -134,6 +143,41 @@ class User extends CI_Controller {
         else{
             return $this->makeJsonRespose($validator->errors, 400);
         }
+    }
+    /**
+     * @api {get} /users Requisitar um usuario
+     * @apiName GetUser
+     * @apiGroup Users
+     * @apiPermission client tracker admin
+     *
+     * @apiUse tokenParam
+     * 
+     * @apiParam (200 - Success) {String} name Nome do usuario.
+     * @apiParam (200 - Success) {String} email Email do usuario.
+     * @apiParam (200 - Success) {Integer} permission A permissão que o usuario tem. Se 1, tem permissão de leitura. Se 2, tem permissão
+     *           de escrita. Se 3, tem permissão de escrita e leitura.
+     *
+     * @apiError 404  UserNotFound
+     *
+     * @apiHeaderExample {Json} Exemplo de Header:
+     *  {"Token": "Me1wdd1TCDqKVym2...hRhCQQ18pdEwjHuig=="}
+     *
+     * @apiSuccessExample Exemplo de respota com sucesso:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "email": "llawliet@email.com",
+     *       "name": "L Lawliet",
+     *       "permission": 1
+     *     }
+     *
+     */
+    public function getUser(){
+        $user = parent::getUser();
+
+        if($user == null)
+            return $this->output->set_status_header(404);
+
+        return $this->makeJsonRespose($user, 200);
     }
     function loadModel(){
         $this->load->model('user_model', '', TRUE);

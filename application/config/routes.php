@@ -85,4 +85,5 @@ $route['routes/(:num)/buses/(:num)/positions']['delete'] = 'bus/deleteLocalizati
 	Users
 */
 $route['users']['post'] = 'user/create';
+$route['users']['get'] = 'user/getUser';
 $route['users/tokens']['post'] ='user/getToken';
