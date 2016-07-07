@@ -5,7 +5,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
 include( APPPATH.'controllers/Authentication.php' );
-
+/**
+ * @apiDefine tokenParam
+ * @apiHeader {String} Token Token do usuario que realizara a ação.
+ */
 class Routes extends Authentication {
 	private $routes = array();
     
@@ -17,6 +20,8 @@ class Routes extends Authentication {
      * @apiName GetRoutes
      * @apiGroup Routes
      * @apiPermission client
+     *
+     * @apiUse tokenParam
      *
      * @apiParam (Parametros de url) {boolean} points Se false, retorna as rotas sem os pontos. 
      *           Se true, retorna com os pontos. Por padrão é false.
@@ -87,6 +92,8 @@ class Routes extends Authentication {
      * @apiName PostRoutes
      * @apiGroup Routes
      * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {String} name Nome da rota a ser adicionada.
      * @apiParam {String} description Descrição da rota a ser adicionada.
@@ -162,6 +169,7 @@ class Routes extends Authentication {
      * @apiGroup Routes
      * @apiPermission client
      *
+     * @apiUse tokenParam
      *
      * @apiSuccess {Integer} id_routes ID unico da rota.
      * @apiSuccess {String} name  Nome da rota.
@@ -236,6 +244,8 @@ class Routes extends Authentication {
      * @apiGroup Routes
      * @apiPermission client
      *
+     * @apiUse tokenParam
+     *
      * @apiParam {Integer} id ID da rota que se requisita os pontos.
      * @apiSuccess {array} points Pontos com latidute e longitude que formam a rota.
      *
@@ -287,6 +297,8 @@ class Routes extends Authentication {
      * @apiName DeleteRoutes
      * @apiGroup Routes
      * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} id ID da rota a ser deletada.
      * @apiSuccess (204 - RouteDeleted) {Integer} id ID da rota deletada.

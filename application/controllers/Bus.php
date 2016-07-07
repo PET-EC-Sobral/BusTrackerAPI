@@ -4,7 +4,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
 include( APPPATH.'controllers/Authentication.php' );
-
+/**
+ * @apiDefine tokenParam
+ * @apiHeader {String} Token Token do usuario que realizara a ação.
+ */
 class Bus extends Authentication {
     
     function loadModel(){
@@ -15,6 +18,8 @@ class Bus extends Authentication {
      * @apiName GetBuses
      * @apiGroup Bus
      * @apiPermission client
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota onde se deseja requisitar os onibus.
      * @apiParam (Parametros de url) {Interger} localizations Se maior que 0, retorna os ônibus com suas n ultimas 
@@ -104,6 +109,8 @@ class Bus extends Authentication {
      * @apiGroup Bus
      * @apiPermission client
      *
+     * @apiUse tokenParam
+     *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que se requisita.
      * @apiParam {Integer} idBus ID do onibus solicitado.          
      * @apiParam (Parametros de url) {Interger} localizations Se maior que 0, retorna o ônibus com suas n ultimas 
@@ -167,6 +174,8 @@ class Bus extends Authentication {
      * @apiGroup Bus
      * @apiPermission client
      *
+     * @apiUse tokenParam
+     *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que se requisita as localizações.
      * @apiParam {Integer} idBus ID do onibus que se requisita as localizações.
      *
@@ -222,6 +231,8 @@ class Bus extends Authentication {
      * @apiName PostPosition
      * @apiGroup Bus
      * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus que será adicionada a localização.
      * @apiParam {Integer} idBus ID do onibus que será adicionada a localização.
@@ -290,6 +301,8 @@ class Bus extends Authentication {
      * @apiGroup Bus
      * @apiPermission tracker
      *
+     * @apiUse tokenParam
+     *
      * @apiSuccess (201 - RouteCreated) {Integer} idBus ID unico do onibus criado.
      * @apiSuccess (201 - RouteCreated) {Integer} idRoute ID da rota em que o onibus foi criado.
      *
@@ -338,6 +351,8 @@ class Bus extends Authentication {
      * @apiGroup Bus
      * @apiPermission tracker
      *
+     * @apiUse tokenParam
+     *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus.
      * @apiParam {Integer} idBus ID do onibus que se deseja apagar as localizações.
      *
@@ -375,6 +390,8 @@ class Bus extends Authentication {
      * @apiName DeleteBus
      * @apiGroup Bus
      * @apiPermission tracker
+     *
+     * @apiUse tokenParam
      *
      * @apiParam {Integer} idRoute ID da rota que contem o onibus.
      * @apiParam {Integer} idBus ID do onibus que se deseja apagar.
