@@ -227,7 +227,7 @@ class Bus extends Authentication {
         return $this->makeJsonRespose($lastLocalizations, 200);
     }
     /**
-     * @api {post} /routes/:idRoute/buses/:idBus/position Adicionar uma localização a um ônibus
+     * @api {post} /routes/:idRoute/buses/:idBus/positions Adicionar uma localização a um ônibus
      * @apiName PostPosition
      * @apiGroup Bus
      * @apiPermission tracker
@@ -256,7 +256,7 @@ class Bus extends Authentication {
      * @apiParamExample {json} Exemplo de requisição:
      *      {
      *        "latitude": 3.2921,
-     *        "longitude": -3.23123,
+     *        "longitude": -3.23123
      *      }
      *
      * @apiErrorExample {json} Exemplo de respota com erro no json da requisição :

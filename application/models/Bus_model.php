@@ -5,7 +5,8 @@ class Bus_model extends CI_Model{
 	public $name;
 	public $description;
 	const table = 'bus';
-	const lastLocalizationsTable = 'last_localizations'; 
+	const lastLocalizationsTable = 'last_localizations';
+	const MAX_LOCALIZATIONS_PER_BUS = 10;
 
 	public function __construct(){
 		parent::__construct();
@@ -41,7 +42,26 @@ class Bus_model extends CI_Model{
 		$localization->date = date('Y-m-d H:i:s');
 		$this->db->insert(self::lastLocalizationsTable, $localization);
 
+
+		$localizationsCount = count(
+			$this->db->select("*")
+					 ->from(self::lastLocalizationsTable)
+					 ->where("id_bus = {$idBus}")
+					 ->get()->result()
+			);
+
+		if($localizationsCount > self::MAX_LOCALIZATIONS_PER_BUS)
+			$this->popLastLocalizations($idRoute, $idBus);
+
 		return $localization->date;
+	}
+	private function popLastLocalizations($idRoute, $idBus){
+		$r = $this->db->select("*")
+				 ->from(self::lastLocalizationsTable)
+				 ->where("id_bus = {$idBus}")
+				 ->order_by("date", "asc")
+				 ->limit(1,0)->delete();
+		echo json_encode($r);
 	}
 	public function insertBus($idRoute, $bus){
 		$busData = new stdClass();
