@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
 include( APPPATH.'controllers/Authentication.php' );
+include(APPPATH."config/config.php");
 
 /**
  * @apiDefine tokenParam
@@ -80,7 +81,7 @@ class User extends Authentication {
         if($validator->valid){
             $this->loadModel();
 
-            $input = json_decode($this->input->raw_input_stream);
+            $input = $this->userFromJson($this->input->raw_input_stream);
             $result = $this->user_model->insert($input);
 
             if(!$result){//check conflict
@@ -129,7 +130,7 @@ class User extends Authentication {
         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/UsersLogin.json');
         if($validator->valid){
             $this->loadModel();
-            $input = json_decode($this->input->raw_input_stream);
+            $input = userFromJson($this->input->raw_input_stream);
 
             $user = $this->user_model->get($input);
             unset($input->password);
@@ -195,5 +196,17 @@ class User extends Authentication {
        $validator = Jsv4\Validator::validate( $route, $schema);
 
        return $validator;
+    }
+    public function userFromJson($json){
+        $user = json_decode($this->input->raw_input_stream);
+        $user->password = User::hash($user->password);
+        return $user;
+    }
+    private static function SALT_USER_PASSWORD(){
+        global $BusTrackerConfig;
+        return $BusTrackerConfig["SALT_USER_PASSWORD"];
+    }
+    private static function hash($value){
+        return hash('sha512',  User::SALT_USER_PASSWORD().$value);
     }
 }
