@@ -82,6 +82,7 @@ class Routes extends Authentication {
         if($this->input->get("points") === "true"){
             foreach ($routes as $route){
                 $route->points = $this->routes_model->getPoints($route->id_routes);
+                $route->googleRoute = $this->getGoogleRoute($route->points);
             }
         }
 
@@ -142,6 +143,12 @@ class Routes extends Authentication {
     	if($validator->valid){
             $this->loadModel();
             $input = json_decode($this->input->raw_input_stream);
+            $input->googleRoute = $this->getGoogleRoute($input->points);
+            $googleRoute = json_decode($this->getGoogleRoute($input->points), JSON_NUMERIC_CHECK); 
+            // check errors in google route
+            if(isset($googleRoute->error_message))
+                return $this->makeJsonRespose($input->googleRoute, 400);
+
             $id = $this->routes_model->insertRoute($input);
             
             return $this->makeJsonRespose(["id" => $id], 201); 
@@ -325,5 +332,42 @@ class Routes extends Authentication {
         }
 
         return $this->makeJsonRespose(["id" => $id], $statusCode);
+    }
+    private function getGoogleRoute($points){
+        if(count($points) < 2)
+            return json_encode(['error_message' => 'At least 2 points is required', 
+                                'statusCode' => 400], JSON_NUMERIC_CHECK);
+
+        //make way points
+        $waypoints = "";
+        for($i = 1; $i < count($points) - 1;$i++)
+            $waypoints = $waypoints.$points[$i]->latitude.",".$points[$i]->longitude."|";
+
+        $origin = $points[0];
+        $destination = $points[count($points)-1];
+        $request = "https://maps.googleapis.com/maps/api/directions/json?".
+        "origin={$origin->latitude},{$origin->longitude}&".
+        "destination={$destination->latitude},{$destination->longitude}&".
+        "waypoints=via:{$waypoints}&".
+        "key=".Routes::GOOGLE_SERVER_KEY();
+
+        return Routes::requestGet($request);
+    }
+    private static function requestGet($url){
+        $curl = curl_init();
+        
+        curl_setopt_array($curl, array(
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL => $url
+        ));
+
+        $resp = curl_exec($curl);
+
+        curl_close($curl);
+        return $resp;
+    }
+    private static function GOOGLE_SERVER_KEY(){
+        global $BusTrackerConfig;
+        return $BusTrackerConfig["GOOGLE_SERVER_KEY"];
     }
 }

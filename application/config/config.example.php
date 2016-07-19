@@ -517,3 +517,5 @@ $config['proxy_ips'] = '';
 */
 
 $BusTrackerConfig["CRYPT_KEY"] = "mysecretcryptkey";
+$BusTrackerConfig["SALT_USER_PASSWORD"] = "mysalt";
+$BusTrackerConfig["GOOGLE_SERVER_KEY"] = "AIza...w4";

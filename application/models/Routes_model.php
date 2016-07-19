@@ -7,9 +7,11 @@ class Routes_model extends CI_Model{
 	const table = 'routes';
 	const pointsTable = 'points_route'; 
 	const busTable = 'bus';
+	public static $google_routes_path;
 
 	public function __construct(){
 		parent::__construct();
+		self::$google_routes_path = APPPATH."google_routes/";
 	}
 	public function index(){
 		return $this->db->get(self::table)->result();
@@ -20,8 +22,12 @@ class Routes_model extends CI_Model{
 						->where(self::table.".id_routes = {$id}")
 						->get()->result();
 
-		if(isset($route[0]))
+		if(isset($route[0])){
+			//recover google route
+			$googleRoute = file_get_contents(self::$google_routes_path.$id);
+			$route[0]->googleRoute = json_decode($googleRoute, JSON_NUMERIC_CHECK);
 			return $route[0];
+		}
 		
 		return null; 
 	}
@@ -47,6 +53,9 @@ class Routes_model extends CI_Model{
 		}
 
 		$this->db->insert_batch(self::pointsTable, $points);
+
+		//write google route information
+		file_put_contents(self::$google_routes_path.$id, $route->googleRoute);
 
 		return $id;
 	}
