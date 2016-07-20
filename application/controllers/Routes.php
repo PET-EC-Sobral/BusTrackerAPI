@@ -23,7 +23,7 @@ class Routes extends Authentication {
      *
      * @apiUse tokenParam
      *
-     * @apiParam (Parametros de url) {boolean} points Se false, retorna as rotas sem os pontos. 
+     * @apiParam (Parametros de url) {boolean} [points] Se false, retorna as rotas sem os pontos.
      *           Se true, retorna com os pontos. Por padrão é false.
      * @apiExample Exemplo de uso:
      *             curl -i http://host/BusTrackerAPI/index.php/routes?points=true
@@ -166,12 +166,71 @@ class Routes extends Authentication {
        return $validator;
         
     }
+    /**
+     * @api {post} /routes Atualizar uma rota
+     * @apiName PutRoutes
+     * @apiGroup Routes
+     * @apiPermission tracker
+     *
+     * @apiUse tokenParam
+     *
+     * @apiParam {String} [name] Nome da rota a ser atualizada.
+     * @apiParam {String} [description] Descrição da rota a ser atualizada.
+     * @apiParam {array} [points] Conjuntos de pontos(coordenadas geográfica) que quando ligados formam a rota a ser atualizada.
+     *
+     * @apiSuccess (201 - RouteUpdated) {Integer} id ID unico da rota.
+     *
+     * @apiError (400 - InvalidJSON) root O json enviado é invalido. Isso pode ocorrer por falta de parametros, erros de tipos e erros de sintaxe.
+     *
+     * @apiParamExample {json} Exemplo de requisição:
+     *   {
+     *       "name": "UFC",
+     *       "description": "UFC - MED2",
+     *   }
+     * @apiSuccessExample Exemplo de respota com sucesso:
+     *     HTTP/1.1 201 Ok
+     *     {"id" : 9}
+     * @apiErrorExample {json} Exemplo de respota com erro no json da requisição :
+     * HTTP/1.1 400 BAD REQUEST
+     * [
+     *     {
+     *       "code": 0,
+     *       "dataPath": "",
+     *       "schemaPath": "/type",
+     *       "message": "Invalid type: null"
+     *     }
+     *   ]
+     */
     function updateRoute($id){
-    	echo "Rota {$id} atualizada";
+    	//check write permissions
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::TRACKER_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
+        $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/RoutesPut.json');
+        if($validator->valid){
+            $this->loadModel();
+            $input = json_decode($this->input->raw_input_stream);
+            
+            if(isset($input->points)){
+                $input->googleRoute = $this->getGoogleRoute($input->points);
+                $googleRoute = json_decode($this->getGoogleRoute($input->points), JSON_NUMERIC_CHECK);
+                // check errors in google route
+                if(isset($googleRoute->error_message))
+                    return $this->makeJsonRespose($input->googleRoute, 400);
+            }
+
+            $input->id_routes = $id;//adds id to route
+            $id = $this->routes_model->updateRoute($input);
+
+            return $this->makeJsonRespose(["id" => $id], 200);
+        }
+        else{
+            return $this->makeJsonRespose($validator->errors, 400);
+        }
     }
     /**
      * @api {get} /routes/:id Requisitar uma rota
-     * @apiParam {Integer} id Users unique ID.
      * @apiName GetRoute
      * @apiGroup Routes
      * @apiPermission client
@@ -182,6 +241,8 @@ class Routes extends Authentication {
      * @apiSuccess {String} name  Nome da rota.
      * @apiSuccess {String} description Descricao da rota.
      * @apiSuccess {Array} id_buses Id de todos os onibus pertencentes a rota.
+     * @apiSuccess {array} googleRoute Um objeto recebido de uma requisição da Directions API. Requisição
+     * cujo o argumento foi o array `points`
      * @apiSuccess {array} points Pontos com latitude e longitude que formam a rota.
      *
      *
@@ -194,6 +255,7 @@ class Routes extends Authentication {
      *         "name": "UFC",
      *         "description": "Rota UFC-BB",
      *         "id_buses": [5,34,1],
+     *         "googleRoute": {...}
      *         "points": [
      *           {
      *             "latitude": -3.694505,
