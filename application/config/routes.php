@@ -82,6 +82,14 @@ $route['routes/(:num)/buses/(:num)/positions']['post'] = 'bus/addLocalization/$1
 $route['routes/(:num)/buses/(:num)/positions']['delete'] = 'bus/deleteLocalizations/$1/$2';
 
 /*
+	Notifications
+*/
+$route['routes/(:num)/notifications']['post'] = 'messages/addMessage/$1/$2';
+$route['routes/(:num)/notifications']['get'] = 'messages/getMessages/$1/$2';
+$route['routes/(:num)/buses/(:num)/notifications']['post'] = 'messages/addMessage/$1/$2';
+$route['routes/(:num)/buses/(:num)/notifications']['get'] = 'messages/getMessages/$1/$2';
+
+/*
 	Users
 */
 $route['users']['post'] = 'user/create';
