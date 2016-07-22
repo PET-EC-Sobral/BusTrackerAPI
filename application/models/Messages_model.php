@@ -8,10 +8,7 @@ class Messages_model extends CI_Model{
 	public $id_routes;
 	public $date;
 	const table = 'messages';
-	const pointsTable = 'points_route';
-	const busTable = 'bus';
-	const notificationPositionTable = 'notifications_update_position';
-	public static $google_routes_path;
+	const registeredNotificationsTable = 'registered_notifications_messages';
 
 	public function __construct(){
 		parent::__construct();
@@ -38,5 +35,28 @@ class Messages_model extends CI_Model{
 
 		return $id;
 	}
+	public function insertNotificationRegistration($notificationRegistration){
+		$registry = new stdClass();
+		$registry->email = $notificationRegistration->email;
+		$registry->id_routes = $notificationRegistration->id_routes;
+		$registry->registration_token_firebase = $notificationRegistration->registration_token_firebase;
 
+		$this->db->insert(self::registeredNotificationsTable, $registry);
+
+		if($this->db->affected_rows() < 1)
+			return false;
+
+		return true;
+
+	}
+	public function getNotificationRegistration($idRoute){
+		$result = $this->db->select("registration_token_firebase")
+						   ->from(self::registeredNotificationsTable)
+						   ->where("id_routes = ".$idRoute)->get()->result();
+		$arrayIds = [];
+		foreach ($result as $row ) {
+			$arrayIds[] = $row->registration_token_firebase;
+		}
+		return $arrayIds;
+	}
 }

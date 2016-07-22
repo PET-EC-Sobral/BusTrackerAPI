@@ -82,12 +82,13 @@ $route['routes/(:num)/buses/(:num)/positions']['post'] = 'bus/addLocalization/$1
 $route['routes/(:num)/buses/(:num)/positions']['delete'] = 'bus/deleteLocalizations/$1/$2';
 
 /*
-	Notifications
+	Messages
 */
-$route['routes/(:num)/notifications']['post'] = 'messages/addMessage/$1/$2';
-$route['routes/(:num)/notifications']['get'] = 'messages/getMessages/$1/$2';
-$route['routes/(:num)/buses/(:num)/notifications']['post'] = 'messages/addMessage/$1/$2';
-$route['routes/(:num)/buses/(:num)/notifications']['get'] = 'messages/getMessages/$1/$2';
+$route['routes/(:num)/messages']['post'] = 'messages/addMessage/$1/$2';
+$route['routes/(:num)/messages']['get'] = 'messages/getMessages/$1/$2';
+$route['routes/(:num)/messages/register']['post'] = 'messages/registerNotification/$1';
+$route['routes/(:num)/buses/(:num)/messages']['post'] = 'messages/addMessage/$1/$2';
+$route['routes/(:num)/buses/(:num)/messages']['get'] = 'messages/getMessages/$1/$2';
 
 /*
 	Users

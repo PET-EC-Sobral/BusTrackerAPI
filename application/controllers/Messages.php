@@ -4,13 +4,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH.'/libraries/Jsv4/Validator.php';
 require APPPATH.'/libraries/Jsv4/ValidationException.php';
 include( APPPATH.'controllers/Authentication.php' );
+include( APPPATH.'third_party/FirebaseUtil.php' );
 /**
  * @apiDefine tokenParam
  * @apiHeader {String} Token Token do usuario que realizara a ação.
  */
 class Messages extends Authentication {
    /**
-     * @api {post} /routes/:idRoute/buses/:idBus/notifications Adicionar uma mensagem a um onibus
+     * @api {post} /routes/:idRoute/buses/:idBus/messages Adicionar uma mensagem a um onibus
      * @apiName PostBusMessage
      * @apiGroup Messages
      * @apiPermission tracker
@@ -46,7 +47,7 @@ class Messages extends Authentication {
      *     }
      */
    /**
-     * @api {post} /routes/:idRoute/notifications Adicionar uma mensagem a uma rota
+     * @api {post} /routes/:idRoute/messages Adicionar uma mensagem a uma rota
      * @apiName PostRouteMessage
      * @apiGroup Messages
      * @apiPermission tracker
@@ -98,18 +99,23 @@ class Messages extends Authentication {
             if(empty($idBus))
                 unset($notification->id_bus);
 
+            $this->notify($this->messages_model->getNotificationRegistration($idRoute), $notification);
+
             return $this->makeJsonRespose($notification, 201);
         }else
             return $this->makeJsonRespose($validator->errors, 400);
     }
+    private function notify($listenersFirebaseIds, $notification){
+       FirebaseUtil::sendMessageMulticast($listenersFirebaseIds, $notification);
+    }
     /**
-     * @api {get} /routes/:idRoute/notifications Requisitar mensagens de uma rota
+     * @api {get} /routes/:idRoute/messages Requisitar mensagens de uma rota
      * @apiName GetRoutesMessages
      * @apiGroup Messages
      * @apiPermission client
      *
      * @apiExample Exemplo de uso:
-     *             curl -i http://host/BusTrackerAPI/index.php/routes/86/notifications?buses=true
+     *             curl -i http://host/BusTrackerAPI/index.php/routes/86/messages?buses=true
      *
      * @apiUse tokenParam
      *
@@ -165,13 +171,13 @@ class Messages extends Authentication {
      *       ]
      */
     /**
-     * @api {get} /routes/:idRoute/buses/:idBus/notifications Requisitar mensagens de um onibus
+     * @api {get} /routes/:idRoute/buses/:idBus/messages Requisitar mensagens de um onibus
      * @apiName GetBusMessages
      * @apiGroup Messages
      * @apiPermission client
      *
      * @apiExample Exemplo de uso:
-     *             curl -i http://host/BusTrackerAPI/index.php/routes/86/buses/1/notifications
+     *             curl -i http://host/BusTrackerAPI/index.php/routes/86/buses/1/messages
      *
      * @apiUse tokenParam
      *
@@ -212,6 +218,83 @@ class Messages extends Authentication {
         $notifications = $this->messages_model->index($idRoutes, $idBus);
 
         return $this->makeJsonRespose($notifications, 200);
+    }
+    /**
+     * @api {post} /routes/:idRoute/messages Registrar um usuário firebase para receber mensagens(Android)
+     * @apiName RegisterNotificationMessages
+     * @apiGroup Messages
+     * @apiPermission client
+     *
+     * @apiDescription Use esta requisição para registrar um usuario firebase nas notificações de mensagens de uma rota. Após
+     * registrado, o usuário receberá mensagens pelo firebase como as mensagens abaixo:
+     *
+     *<pre><code>
+     * {//mensagem de uma rota<br/>
+     *   "title": "Onibus",<br/>
+     *   "message": "O esse onibus eh bom :)",<br/>
+     *   "id_routes": 86,<br/>
+     *   "id": 47<br/>
+     * }<br/>
+     *</code></pre>
+     *<pre><code>
+     *  {//mensagem de um onibus pq tem id onibus<br/>
+     *    "title": "Onibus",<br/>
+     *    "message": "O esse onibus eh bom :)",<br/>
+     *    "id_routes": 86,<br/>
+     *    "id_bus": 1,<br/>
+     *    "id": 48<br/>
+     *  }
+     *</code></pre>
+     *
+     * @apiUse tokenParam
+     *
+     * @apiParam (BodyParam) {String} registration_token_firebase Token firebase do usuário. Veja [aqui](https://firebase.google.com/docs/cloud-messaging/android/client#sample-register)
+     *            como adquirir em android.
+     *
+     * @apiError 404  RouteNotFound
+     * @apiError 401 InvalidToken
+     * @apiError 409 ExistingRegistry
+     * @apiError (400 - InvalidJSON) root O json enviado é invalido. Isso pode ocorrer por falta de parametros, erros de tipos e erros de sintaxe.
+     *
+     *
+     * @apiSuccessExample Exemplo de respota com sucesso:
+     *     HTTP/1.1 201 OK
+     *     {
+     *       "registration_token_firebase": "dIqrrKgmq40:APA91bGFbK1eLFjHJrVPxiQpuu_WUOoB6ZLkl8XxkEAbmf1jKrthc9_sZfWEqViVzhoqjYgstKpr4RjCvr4eV30dgJnQJO6YmBqT2jg-ME4q0M5dGPu3Uez1vo3aX0xuzdMgT0epj3tz",
+     *       "id_routes": 86,
+     *       "email": "santana@email.com"
+     *     }
+     *
+     */
+    function registerNotification($idRoute){
+        $token = $this->authenticate();
+        if(!$token->valid(Authentication::CLIENT_PERMISSION))
+            return $this->makeUnauthorizedResponse();
+
+         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/NotificationRegistryAdd.json');
+        if($validator->valid){
+            $registry = json_decode($this->input->raw_input_stream);
+
+            //check route exist
+            $this->load->model('routes_model', '', TRUE);
+            if(!$this->routes_model->existRoute($idRoute))
+                return $this->makeJsonRespose(["error" => "NOT_FOUND_ROUTE"], 404);
+
+            $user = parent::getUser();
+            if($user == null)
+                return $this->makeJsonRespose(["error" => "INVALID_TOKEN"], 401);
+
+            $registry->id_routes = $idRoute;
+            $registry->email = $user->email;
+            $this->loadModel();
+            $result = $this->messages_model->insertNotificationRegistration($registry);
+
+            if(!$result)//exist conflict registry
+                return $this->makeJsonRespose(["error" => "CONFLICT"], 409);
+
+            return $this->makeJsonRespose($registry, 201);
+        }else
+            return $this->makeJsonRespose($validator->errors, 400);
     }
     function loadModel(){
         $this->load->model('messages_model', '', TRUE);
