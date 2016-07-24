@@ -61,7 +61,6 @@ class Bus_model extends CI_Model{
 				 ->where("id_bus = {$idBus}")
 				 ->order_by("date", "asc")
 				 ->limit(1,0)->delete();
-		echo json_encode($r);
 	}
 	public function insertBus($idRoute, $bus){
 		$busData = new stdClass();

@@ -130,7 +130,7 @@ class User extends Authentication {
         $validator = $this->validateJson($this->input->raw_input_stream, APPPATH.'/controllers/Schemas/UsersLogin.json');
         if($validator->valid){
             $this->loadModel();
-            $input = userFromJson($this->input->raw_input_stream);
+            $input = $this->userFromJson($this->input->raw_input_stream);
 
             $user = $this->user_model->get($input);
             unset($input->password);

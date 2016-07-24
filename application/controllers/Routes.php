@@ -167,7 +167,7 @@ class Routes extends Authentication {
         
     }
     /**
-     * @api {post} /routes Atualizar uma rota
+     * @api {put} /routes/:id Atualizar uma rota
      * @apiName PutRoutes
      * @apiGroup Routes
      * @apiPermission tracker
