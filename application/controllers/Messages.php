@@ -92,6 +92,11 @@ class Messages extends Authentication {
             $notification->id_routes = $idRoute;
             $notification->id_bus = empty($idBus) ? NULL : $idBus;
 
+            //check route exist
+            $this->load->model('routes_model', '', TRUE);
+            if(!$this->routes_model->existRoute($idRoute))
+                return $this->makeJsonRespose(["error" => "NOT_FOUND_ROUTE"], 404);
+
             $notification->id = $this->messages_model->insert($notification);
             if($notification->id == null)
                 return $this->makeJsonRespose(["error" => "INTERNAL_ERROR"], 500);
