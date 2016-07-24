@@ -104,4 +104,15 @@ class Routes_model extends CI_Model{
 		$this->db->where('id_routes', $id);
 		$this->db->delete(self::pointsTable);
 	}
+	public function existRoute($id){
+       $route = $this->db->select('id_routes')
+                                       ->from(self::table)
+                                       ->where(self::table.".id_routes = {$id}")
+                                       ->get()->result();
+
+       if(count($route) > 0)
+               return true;
+
+       return false;
+   }
 }
