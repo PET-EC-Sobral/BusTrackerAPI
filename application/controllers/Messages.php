@@ -176,7 +176,7 @@ class Messages extends Authentication {
      *       ]
      */
     /**
-     * @api {get} /routes/:idRoute/buses/:idBus/messages Requisitar mensagens de um onibus
+     * @api {get} /routes/:idRoute/buses/:idBus/messages/ Requisitar mensagens de um onibus
      * @apiName GetBusMessages
      * @apiGroup Messages
      * @apiPermission client
@@ -225,7 +225,7 @@ class Messages extends Authentication {
         return $this->makeJsonRespose($notifications, 200);
     }
     /**
-     * @api {post} /routes/:idRoute/messages Registrar um usuário firebase para receber mensagens(Android)
+     * @api {post} /routes/:idRoute/messages/register Registrar um usuário firebase para receber mensagens(Android)
      * @apiName RegisterNotificationMessages
      * @apiGroup Messages
      * @apiPermission client
