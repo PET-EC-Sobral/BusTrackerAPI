@@ -294,9 +294,6 @@ class Messages extends Authentication {
             $this->loadModel();
             $result = $this->messages_model->insertNotificationRegistration($registry);
 
-            if(!$result)//exist conflict registry
-                return $this->makeJsonRespose(["error" => "CONFLICT"], 409);
-
             return $this->makeJsonRespose($registry, 201);
         }else
             return $this->makeJsonRespose($validator->errors, 400);

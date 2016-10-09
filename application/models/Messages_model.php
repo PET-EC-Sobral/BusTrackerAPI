@@ -41,10 +41,18 @@ class Messages_model extends CI_Model{
 		$registry->id_routes = $notificationRegistration->id_routes;
 		$registry->registration_token_firebase = $notificationRegistration->registration_token_firebase;
 
-		$this->db->insert(self::registeredNotificationsTable, $registry);
-
-		if($this->db->affected_rows() < 1)
-			return false;
+		//check if existing entry
+		$search = $this->db->select("email")
+						    ->from(self::registeredNotificationsTable)
+						    ->where("email = '{$registry->email}' AND id_routes = '$notificationRegistration->id_routes'")
+						    ->get()->result();
+		
+		if(count($search) < 1)//insert
+			$this->db->insert(self::registeredNotificationsTable, $registry);
+		else{//update only firebase token
+			$this->db->where("email = '{$registry->email}' AND id_routes = '$notificationRegistration->id_routes'");
+			$this->db->update(self::registeredNotificationsTable, array("registration_token_firebase" => $notificationRegistration->registration_token_firebase));
+		}
 
 		return true;
 
