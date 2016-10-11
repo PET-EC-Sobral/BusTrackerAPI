@@ -104,6 +104,9 @@ class Messages extends Authentication {
             if(empty($idBus))
                 unset($notification->id_bus);
 
+            //put date on the firebase message 
+            $notification->date = date('Y-m-d H:i:s');
+
             $this->notify($this->messages_model->getNotificationRegistration($idRoute), $notification);
 
             return $this->makeJsonRespose($notification, 201);
