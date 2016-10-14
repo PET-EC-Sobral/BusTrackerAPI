@@ -13,11 +13,11 @@
 *Para gerar a domumentação use o make_docs.sh. Obs: é necessario ter instalado o [apidoc](https://github.com/apidoc/apidoc) previamente.  
 
 
-Clientes
+Exemplo de clientes
 --------
 
-* [Rastreador android](https://github.com/LaercioSantana/BusTracker-TrackerApp)
+* [Rastreador android](https://github.com/PET-EC-Sobral/BusTracker-TrackerApp)
 
-* [Android](https://github.com/AbnerSN/BusTrackerMobile)
+* [Android](https://github.com/PET-EC-Sobral/BusTrackerMobile)
 
-* [Web](https://github.com/LaercioSantana/bus-tracker-web-client)
+* [Web](https://github.com/PET-EC-Sobral/bus-tracker-web-client)
