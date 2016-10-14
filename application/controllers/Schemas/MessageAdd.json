@@ -7,6 +7,12 @@
     },
     "message": {
       "type": "string"
+    },
+    "registration_token_firebase": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

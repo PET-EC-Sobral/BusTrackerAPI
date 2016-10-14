@@ -97,9 +97,19 @@ class Messages extends Authentication {
             if(!$this->routes_model->existRoute($idRoute))
                 return $this->makeJsonRespose(["error" => "NOT_FOUND_ROUTE"], 404);
 
-            $notification->id = $this->messages_model->insert($notification);
-            if($notification->id == null)
-                return $this->makeJsonRespose(["error" => "INTERNAL_ERROR"], 500);
+            //get firebase id, to send message
+            $listenersFirebaseIds = $this->messages_model->getNotificationRegistration($idRoute);
+
+            //set tokens, to send for users specific
+            //debug purpose only
+            if(!empty($notification->registration_token_firebase)){
+                $listenersFirebaseIds = $notification->registration_token_firebase;
+            }
+            else{//save notification in database
+                $notification->id = $this->messages_model->insert($notification);
+                if($notification->id == null)
+                    return $this->makeJsonRespose(["error" => "INTERNAL_ERROR"], 500);
+            }
 
             if(empty($idBus))
                 unset($notification->id_bus);
@@ -107,7 +117,7 @@ class Messages extends Authentication {
             //put date on the firebase message 
             $notification->date = date('Y-m-d H:i:s');
 
-            $this->notify($this->messages_model->getNotificationRegistration($idRoute), $notification);
+            $this->notify($listenersFirebaseIds, $notification);
 
             return $this->makeJsonRespose($notification, 201);
         }else
