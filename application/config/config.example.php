@@ -519,3 +519,9 @@ $config['proxy_ips'] = '';
 $BusTrackerConfig["CRYPT_KEY"] = "mysecretcryptkey";
 $BusTrackerConfig["SALT_USER_PASSWORD"] = "mysalt";
 $BusTrackerConfig["GOOGLE_SERVER_KEY"] = "AIza...w4";
+
+/*
+ * Change timezone, suported timezones: http://php.net/manual/pt_BR/timezones.php
+ * http://php.net/manual/pt_BR/timezones.php
+ */
+date_default_timezone_set('America/Fortaleza');
