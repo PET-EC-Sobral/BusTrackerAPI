@@ -96,3 +96,9 @@ $route['routes/(:num)/buses/(:num)/messages']['get'] = 'messages/getMessages/$1/
 $route['users']['post'] = 'user/create';
 $route['users']['get'] = 'user/getUser';
 $route['users/tokens']['post'] ='user/getToken';
+
+/*
+	Reference Points
+*/
+$route['routes/(:num)/referencepoints']['post'] = 'referencePoints/add/$1';
+$route['routes/(:num)/referencepoints']['get'] = 'referencePoints/index/$1';
